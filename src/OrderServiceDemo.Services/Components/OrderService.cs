@@ -8,7 +8,7 @@ using OrderServiceDemo.Services.Interfaces;
 
 namespace OrderServiceDemo.Services.Components
 {
-    public class OrderService : IOrderService, ICancelOrderService
+    public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderLineItemRepository _orderLineItemRepository;
@@ -43,23 +43,6 @@ namespace OrderServiceDemo.Services.Components
             var order = await _orderRepository.GetOrder(orderId);
             await BuildUpOrder(order);
             return order;
-        }
-
-        public async Task<Order> CancelOrder(int orderId)
-        {
-            var order = await _orderRepository.GetOrder(orderId);
-
-            if (order == null)
-                throw new OrderNonExistentException("Order sent to be cancelled does not exist.");
-
-            if (order.OrderStatus == OrderStatus.Cancelled)
-                throw new OrderAlreadyCancelledException("Order sent to be cancelled is already cancelled.");
-
-            order.OrderStatus = OrderStatus.Cancelled;
-
-            var cancelledOrder = await _orderRepository.UpdateOrder(order);
-
-            return cancelledOrder;
         }
 
         public async Task<Order> DeleteOrder(int orderId)

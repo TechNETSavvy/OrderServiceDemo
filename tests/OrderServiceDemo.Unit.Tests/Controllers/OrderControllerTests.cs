@@ -77,6 +77,23 @@ namespace OrderServiceDemo.Unit.Tests.Controllers
             Assert.Equal((int)System.Net.HttpStatusCode.BadRequest, result.StatusCode);
         }
 
+        [Fact]
+        public async Task OrderController_WhenDeletingOrder_IfOrderDoesNotExist_ShouldReturn_HttpBadReqest()
+        {
+            //Arrange
+            _orderService
+                .DeleteOrder(Arg.Any<int>())
+                .Returns(Task.FromException<Models.Order>(new OrderNonExistentException("The order sent for deletion does not exist.")));
+
+            var controller = BuildController();
+
+            //Act
+            var result = await Assert.ThrowsAsync<StatusCodeException>(() => controller.DeleteOrder(-200));
+
+            //Assert
+            Assert.Equal((int)System.Net.HttpStatusCode.BadRequest, result.StatusCode);
+        }
+
         private OrderController BuildController() => new OrderController(
             _mapper, 
             _orderService);

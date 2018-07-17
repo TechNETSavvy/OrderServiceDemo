@@ -85,10 +85,18 @@ namespace OrderServiceDemo.Controllers
 
         [HttpDelete]
         [Route("v1/orders/{orderId:int}")]
-        public Task<Order> DeleteOrder(int orderId)
+        public async Task<Order> DeleteOrder(int orderId)
         {
-            //TODO: Add controller implementation.
-            return Task.FromException<Order>(BuildExceptionResponse(HttpStatusCode.NotImplemented, new NotImplementedException()));
+            try
+            {
+                var deletedOrder = await _orderService.DeleteOrder(orderId);
+                var response = _mapper.Map<Order>(deletedOrder);
+                return response;
+            }
+            catch (OrderNonExistentException ex)
+            {
+                throw BuildExceptionResponse(HttpStatusCode.BadRequest, ex);
+            }
         }
     }
 }

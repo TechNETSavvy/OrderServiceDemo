@@ -1,49 +1,52 @@
 ﻿using NSubstitute;
-using OrderServiceDemo.Core;
 using OrderServiceDemo.Models.Exceptions;
 using OrderServiceDemo.Services.Components;
 using OrderServiceDemo.Services.Infrastructure;
+using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace OrderServiceDemo.Unit.Tests.Services
 {
-    public class OrderServiceTests
+    public class CancelOrderServiceTests
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderLineItemRepository _orderLineItemRepository;
 
-        public OrderServiceTests()
+        public CancelOrderServiceTests()
         {
             _orderRepository = Substitute.For<IOrderRepository>();
             _orderLineItemRepository = Substitute.For<IOrderLineItemRepository>();
         }
 
+        public IOrderLineItemRepository OrderLineItemRepository => _orderLineItemRepository;
+
         [Fact]
-        public async Task OrderService_WhenCreatingOrder_IfNoLineItems_ThrowsInvalidRequestException()
+        public async Task OrderService_WhenCancellingOrder_IfOrderAlreadyCancelled_ThrowsOrderAlreadyCancelledException()
         {
             //Arrange
-            var order = new Models.Order();
+            var orderId = 1;
             var service = BuildService();
 
             //Act && Assert
-            var result = await Assert.ThrowsAsync<InvalidRequestException>(() => service.CreateOrder(order));
+            var result = await Assert.ThrowsAsync<OrderAlreadyCancelledException>(() => service.CancelOrder(orderId));
         }
 
         [Fact]
-        public async Task OrderService_WhenDeletingOrder_IfOrderDoesNotExist_ThrowsOrderNonExistentException()
+        public async Task OrderService_WhenCancellingOrder_IfOrderDoesNotExist_ThrowsOrderNonExistentException()
         {
             //Arrange
             var orderId = -100;
             var service = BuildService();
 
             //Act && Assert
-            var result = await Assert.ThrowsAsync<OrderNonExistentException>(() => service.DeleteOrder(orderId));
+            var result = await Assert.ThrowsAsync<OrderNonExistentException>(() => service.CancelOrder(orderId));
         }
 
-        private OrderService BuildService() => new OrderService(
+        private CancelOrderService BuildService() => new CancelOrderService(
             _orderRepository,
-            _orderLineItemRepository);
+            OrderLineItemRepository);
     }
 }
