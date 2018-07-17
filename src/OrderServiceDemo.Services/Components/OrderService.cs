@@ -47,8 +47,6 @@ namespace OrderServiceDemo.Services.Components
 
         public async Task<Order> CancelOrder(int orderId)
         {
-            //TODO: Add service implementation. Throw exception if the indicated order does not exist or has already been cancelled.
-            //TODO: Add Unit tests for this service method.
             var order = await _orderRepository.GetOrder(orderId);
 
             if (order == null)
@@ -64,11 +62,18 @@ namespace OrderServiceDemo.Services.Components
             return cancelledOrder;
         }
 
-        public Task<Order> DeleteOrder(int orderId)
+        public async Task<Order> DeleteOrder(int orderId)
         {
-            //TODO: Add service implementation. Throw exception if the indicated order does not exist.
-            //TODO: Add Unit tests for this service method.
-            throw new System.NotImplementedException();
+            var order = await _orderRepository.GetOrder(orderId);
+
+            if (order == null)
+                throw new OrderNonExistentException("Order sent to be cancelled does not exist.");
+
+            await _orderLineItemRepository.DeleteAllLineItemsInOrder(order.OrderId);
+
+            var deletedOrder = await _orderRepository.DeleteOrder(order);
+
+            return deletedOrder;
         }
 
         private async Task<Order> BuildUpOrder(Order order)

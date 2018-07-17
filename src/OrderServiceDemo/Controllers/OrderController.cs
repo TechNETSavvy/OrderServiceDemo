@@ -49,6 +49,40 @@ namespace OrderServiceDemo.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("v1/orders/{orderId:int}/cancel")]
+        public async Task<Order> CancelOrder(int orderId)
+        {
+            if(_orderService is ICancelOrderService)
+            {
+                var cancelService = _orderService as ICancelOrderService;
+
+                try
+                {
+                    var cancelledOrder = await cancelService.CancelOrder(orderId);
+                    var response = _mapper.Map<Order>(cancelledOrder);
+                    return response;
+                }
+                catch (Exception ex)
+                {
+                    if (ex is OrderAlreadyCancelledException)
+                    {
+                        //Exception specific operation
+                    }
+                    else if (ex is OrderNonExistentException)
+                    {
+                        //Exception specific operation
+                    }
+
+                    throw BuildExceptionResponse(HttpStatusCode.BadRequest, ex);
+                }
+            }
+            else
+            {
+                throw BuildExceptionResponse(HttpStatusCode.NotImplemented, new NotSupportedException());
+            }
+        }
+
         [HttpDelete]
         [Route("v1/orders/{orderId:int}")]
         public Task<Order> DeleteOrder(int orderId)
