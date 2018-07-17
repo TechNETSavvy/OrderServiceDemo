@@ -49,14 +49,6 @@ namespace OrderServiceDemo.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("v1/orders/{orderId:int}/cancel")]
-        public Task<Order> CancelOrder(int orderId)
-        {
-            //TODO: Add controller implementation.
-            return Task.FromException<Order>(BuildExceptionResponse(HttpStatusCode.NotImplemented, new NotImplementedException()));
-        }
-
         [HttpDelete]
         [Route("v1/orders/{orderId:int}")]
         public Task<Order> DeleteOrder(int orderId)

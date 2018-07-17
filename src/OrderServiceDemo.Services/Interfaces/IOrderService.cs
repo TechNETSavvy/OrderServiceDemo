@@ -5,6 +5,11 @@ namespace OrderServiceDemo.Services.Interfaces
 {
     public interface IOrderService
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
         Task<Order> GetOrder(int orderId);
 
         /// <summary>

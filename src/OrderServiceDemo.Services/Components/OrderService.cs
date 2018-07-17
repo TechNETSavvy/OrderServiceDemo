@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using OrderServiceDemo.Core;
 using OrderServiceDemo.Models;
 using OrderServiceDemo.Models.Exceptions;
 using OrderServiceDemo.Services.Infrastructure;
@@ -7,7 +8,7 @@ using OrderServiceDemo.Services.Interfaces;
 
 namespace OrderServiceDemo.Services.Components
 {
-    public class OrderService : IOrderService
+    public class OrderService : IOrderService, ICancelOrderService
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderLineItemRepository _orderLineItemRepository;
@@ -44,11 +45,23 @@ namespace OrderServiceDemo.Services.Components
             return order;
         }
 
-        public Task<Order> CancelOrder(int orderId)
+        public async Task<Order> CancelOrder(int orderId)
         {
             //TODO: Add service implementation. Throw exception if the indicated order does not exist or has already been cancelled.
             //TODO: Add Unit tests for this service method.
-            throw new System.NotImplementedException();
+            var order = await _orderRepository.GetOrder(orderId);
+
+            if (order == null)
+                throw new OrderNonExistentException("Order sent to be cancelled does not exist.");
+
+            if (order.OrderStatus == OrderStatus.Cancelled)
+                throw new OrderAlreadyCancelledException("Order sent to be cancelled is already cancelled.");
+
+            order.OrderStatus = OrderStatus.Cancelled;
+
+            var cancelledOrder = await _orderRepository.UpdateOrder(order);
+
+            return cancelledOrder;
         }
 
         public Task<Order> DeleteOrder(int orderId)
