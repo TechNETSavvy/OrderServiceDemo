@@ -2,9 +2,7 @@
 using OrderServiceDemo.Models.Exceptions;
 using OrderServiceDemo.Services.Components;
 using OrderServiceDemo.Services.Infrastructure;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -30,6 +28,13 @@ namespace OrderServiceDemo.Unit.Tests.Services
             var orderId = 1;
             var service = BuildService();
 
+            _orderRepository
+                .GetOrder(Arg.Any<int>())
+                .Returns(new Models.Order
+                {
+                    OrderStatus = Core.OrderStatus.Cancelled
+                });
+
             //Act && Assert
             var result = await Assert.ThrowsAsync<OrderAlreadyCancelledException>(() => service.CancelOrder(orderId));
         }
@@ -40,6 +45,10 @@ namespace OrderServiceDemo.Unit.Tests.Services
             //Arrange
             var orderId = -100;
             var service = BuildService();
+
+            _orderRepository
+                .GetOrder(Arg.Any<int>())
+                .Returns(null as Models.Order);
 
             //Act && Assert
             var result = await Assert.ThrowsAsync<OrderNonExistentException>(() => service.CancelOrder(orderId));

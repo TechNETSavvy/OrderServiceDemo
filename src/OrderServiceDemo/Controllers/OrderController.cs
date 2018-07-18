@@ -14,12 +14,12 @@ namespace OrderServiceDemo.Controllers
 {
     public class OrderController : BaseServiceController
     {
-        private readonly IOrderService _orderService;
+        private readonly ICancelOrderService _orderService;
         private readonly IMapper _mapper;
 
         public OrderController(
             IMapper mapper,
-            IOrderService orderService)
+            ICancelOrderService orderService)
         {
             _mapper = mapper;
             _orderService = orderService;
@@ -53,33 +53,24 @@ namespace OrderServiceDemo.Controllers
         [Route("v1/orders/{orderId:int}/cancel")]
         public async Task<Order> CancelOrder(int orderId)
         {
-            if(_orderService is ICancelOrderService)
+            try
             {
-                var cancelService = _orderService as ICancelOrderService;
-
-                try
-                {
-                    var cancelledOrder = await cancelService.CancelOrder(orderId);
-                    var response = _mapper.Map<Order>(cancelledOrder);
-                    return response;
-                }
-                catch (Exception ex)
-                {
-                    if (ex is OrderAlreadyCancelledException)
-                    {
-                        //Exception specific operation
-                    }
-                    else if (ex is OrderNonExistentException)
-                    {
-                        //Exception specific operation
-                    }
-
-                    throw BuildExceptionResponse(HttpStatusCode.BadRequest, ex);
-                }
+                var cancelledOrder = await _orderService.CancelOrder(orderId);
+                var response = _mapper.Map<Order>(cancelledOrder);
+                return response;
             }
-            else
+            catch (Exception ex)
             {
-                throw BuildExceptionResponse(HttpStatusCode.NotImplemented, new NotSupportedException());
+                if (ex is OrderAlreadyCancelledException)
+                {
+                    //Exception specific operation
+                }
+                else if (ex is OrderNonExistentException)
+                {
+                    //Exception specific operation
+                }
+
+                throw BuildExceptionResponse(HttpStatusCode.BadRequest, ex);
             }
         }
 
