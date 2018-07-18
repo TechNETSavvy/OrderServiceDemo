@@ -50,7 +50,7 @@ namespace OrderServiceDemo.Services.Components
             var order = await _orderRepository.GetOrder(orderId);
 
             if (order == null)
-                throw new OrderNonExistentException("Order sent to be cancelled does not exist.");
+                throw new OrderNonExistentException("Order sent to be deleted does not exist.");
 
             await _orderLineItemRepository.DeleteAllLineItemsInOrder(order.OrderId);
 

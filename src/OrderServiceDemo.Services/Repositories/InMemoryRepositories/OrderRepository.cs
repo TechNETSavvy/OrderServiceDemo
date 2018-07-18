@@ -17,7 +17,12 @@ namespace OrderServiceDemo.Services.Repositories.InMemoryRepositories
             _orderLineItemRepository = orderLineItemRepository;
         }
 
-        protected override Action<Order> SetIdentity => ((x) => x.OrderId = Entities.Count() + 1);
+        //The change to this implementation is because of the bug found below.
+        protected override Action<Order> SetIdentity => ((x) =>
+        {
+            if(x.OrderId == 0)
+                x.OrderId = Entities.Count() + 1;
+        });
 
         public Task<Order> CreateOrder(Order order)
         {
@@ -51,7 +56,11 @@ namespace OrderServiceDemo.Services.Repositories.InMemoryRepositories
             if (existing == null)
                 return null; //This would most closely match the behavior of an update sql script (with output inserted.*) that updated nothing.
 
+            //Noticed a small bug here where any time an order was deleted then re-added as an update the "identity"
+            //would increment again causing multiple orders with the same OrderId to exist causing the SingleOrDefault
+            //method call in GetOrder to throw an exception.
             await DeleteEntity(existing);
+
             var result = await AddEntity(order);
             return result;
         }
